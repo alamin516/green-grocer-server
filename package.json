@@ -1,0 +1,30 @@
+{
+  "name": "green-grocer-server",
+  "version": "1.0.0",
+  "description": "ecommerce-project",
+  "main": "server.js",
+  "scripts": {
+    "start": "node ./src/server.js",
+    "dev": "nodemon ./src/server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "ecommerce",
+    "shop",
+    "multi-vendor"
+  ],
+  "author": "Md Alamin",
+  "license": "ISC",
+  "dependencies": {
+    "body-parser": "^1.20.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.0",
+    "express-rate-limit": "^7.4.0",
+    "http-errors": "^2.0.0",
+    "mongoose": "^8.6.3",
+    "morgan": "^1.10.0",
+    "nodemon": "^3.1.7",
+    "xss-clean": "^0.1.4"
+  }
+}
