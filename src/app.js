@@ -5,9 +5,13 @@ const createError = require("http-errors");
 const bodyParser = require("body-parser");
 const xssClean = require("xss-clean");
 const rateLimit = require("express-rate-limit");
+const cookieParser = require("cookie-parser");
 
 
 const { errorResponse } = require("./controllers/responseController");
+const { seedRouter } = require("./routes/seedRouter");
+const userRouter = require("./routes/userRouter");
+const productRouter = require("./routes/productRouter");
 
 
 const app = express();
@@ -20,15 +24,26 @@ const rateLimiter = rateLimit({
 
 // Middlewares
 app.use(morgan("dev"));
-app.use(cors());
-app.use(bodyParser.urlencoded({ extended: true }));
+
+// Cookie Parser
+app.use(cookieParser());
+
+// cors ==> Cross origin
+app.use(cors({
+    origin: [process.env.ORIGIN],
+    credentials: true
+}));
+
 app.use(rateLimiter);
 app.use(xssClean());
+
 app.use(express.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static("public"));
 
 
 // Routes /api/v1/
+app.use("/api/v1", seedRouter, userRouter, productRouter);
 
 
 
@@ -47,7 +62,7 @@ app.get("/api/v1/test", (req, res)=>{
 
 // client Error Handle
 app.use((req, res, next)=> {
-    next(createError(404, "Route not found"));
+    next(createError(404, `${req.originalUrl} route not found`));
 });
 
 
