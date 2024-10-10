@@ -1,7 +1,7 @@
 require("dotenv").config();
 const setAccessTokenCookie = (res, accessToken, time = "15") => {
   res.cookie("access_token", accessToken, {
-    domain: process.env.ORIGIN",
+    domain: process.env.ORIGIN,
     maxAge: time * 60 * 60 * 1000,
     httpOnly: true,
     secure: true,
