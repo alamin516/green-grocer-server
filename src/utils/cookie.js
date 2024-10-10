@@ -3,7 +3,7 @@ const setAccessTokenCookie = (res, accessToken, time = "15") => {
     maxAge: time * 60 * 60 * 1000,
     httpOnly: true,
     secure: true,
-    sameSite: "none",
+    sameSite: "lax",
   });
 };
 
@@ -12,7 +12,7 @@ const setRefreshTokenCookie = (res, refreshToken, time = "7") => {
     maxAge: time * 24 * 60 * 60 * 1000,
     httpOnly: true,
     secure: true,
-    sameSite: "none",
+    sameSite: "lax",
   });
 };
 
