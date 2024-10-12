@@ -6,6 +6,7 @@ const bodyParser = require("body-parser");
 const xssClean = require("xss-clean");
 const rateLimit = require("express-rate-limit");
 const cookieParser = require("cookie-parser");
+require("dotenv").config();
 
 
 const { errorResponse } = require("./controllers/responseController");
@@ -44,9 +45,6 @@ app.use(express.static("public"));
 
 // Routes /api/v1/
 app.use("/api/v1", seedRouter, userRouter, productRouter);
-
-
-
 
 
 
