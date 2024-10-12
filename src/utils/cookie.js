@@ -6,7 +6,6 @@ const setAccessTokenCookie = (res, accessToken) => {
     httpOnly: true,
     secure: true,
     sameSite: "None",
-    domain: process.env.COOKIE_DOMAIN
   });
 };
 
@@ -16,7 +15,6 @@ const setRefreshTokenCookie = (res, refreshToken) => {
     httpOnly: true,
     secure: true,
     sameSite: "None",
-    domain: process.env.COOKIE_DOMAIN
   });
 };
 
