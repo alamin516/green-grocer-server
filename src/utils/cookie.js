@@ -4,8 +4,6 @@ const setAccessTokenCookie = (res, accessToken) => {
     httpOnly: true,
     secure: true,
     sameSite: "None",
-    domain: "green-grocer-mart.web.app",
-    path: "/",
   });
 };
 
@@ -15,8 +13,6 @@ const setRefreshTokenCookie = (res, refreshToken) => {
     httpOnly: true,
     secure: true,
     sameSite: "None",
-    domain: "green-grocer-mart.web.app",
-    path: "/",
   });
 };
 
