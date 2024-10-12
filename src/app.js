@@ -1,3 +1,4 @@
+require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const morgan = require("morgan");
@@ -6,7 +7,6 @@ const bodyParser = require("body-parser");
 const xssClean = require("xss-clean");
 const rateLimit = require("express-rate-limit");
 const cookieParser = require("cookie-parser");
-require("dotenv").config();
 
 
 const { errorResponse } = require("./controllers/responseController");
@@ -29,11 +29,12 @@ app.use(morgan("dev"));
 // Cookie Parser
 app.use(cookieParser());
 
-// cors ==> Cross origin
-app.use(cors({
-  origin: [process.env.ORIGIN],
-  credentials: true,
-}));
+app.use(
+  cors({
+    origin: [process.env.ORIGIN],
+    credentials: true,
+  })
+);
 
 app.use(rateLimiter);
 app.use(xssClean());
