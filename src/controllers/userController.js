@@ -79,7 +79,7 @@ const createActivationToken = (user) => {
   const token = jwt.sign(
     { user, activationCode },
     process.env.ACTIVATION_SECRET,
-    { expiresIn: "5h" }
+    { expiresIn: "1h" }
   );
   return { token, activationCode };
 };
@@ -147,7 +147,7 @@ const login = CatchAsyncError(async (req, res, next) => {
       return next(new ErrorHandler("Invalid password", 400));
     }
 
-    const accessToken = createJSONWebToken({ user }, jwtAccessSecret, "1h");
+    const accessToken = createJSONWebToken({ user }, jwtAccessSecret, "15m");
     setAccessTokenCookie(res, accessToken);
 
     const refreshToken = createJSONWebToken({ user }, jwtAccessSecret, "7d");
@@ -192,11 +192,7 @@ const updateAccessToken = CatchAsyncError(async (req, res, next) => {
 
     const user = await User.findById(decoded.user);
 
-    if (!user) {
-      return next(new ErrorHandler("User not found", 404));
-    }
-
-    const accessToken = createJSONWebToken({ user }, jwtAccessSecret, "1h");
+    const accessToken = createJSONWebToken({ user }, jwtAccessSecret, "15m");
     const refreshToken = createJSONWebToken({ user }, jwtAccessSecret, "7d");
 
     req.user = user;
@@ -268,11 +264,9 @@ const resetPasswordTokenValidate = CatchAsyncError(async (req, res, next) => {
   }
 });
 
-const updateUserPassword = CatchAsyncError(async (req, res, next) => {
+const updateResetUserPassword = CatchAsyncError(async (req, res, next) => {
   try {
     const { password, email } = req.body;
-
-    console.log(password, email);
 
     const user = await User.findOne({ email });
 
@@ -293,6 +287,69 @@ const updateUserPassword = CatchAsyncError(async (req, res, next) => {
   }
 });
 
+const updateUserPassword = CatchAsyncError(async (req, res, next) => {
+  try {
+    const { password, email } = req.body;
+
+    if(req.user?.email !== email){
+      return next(new ErrorHandler("You are not authorized to change this user's password", 403))
+    }
+
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return next(new ErrorHandler("User not found", 500));
+    }
+
+    const hashPassword = await bcryptjs.hash(password, 10);
+
+    await User.updateOne({ email }, { $set: { password: hashPassword } });
+
+    res.status(201).json({
+      success: true,
+      message: "Password updated successfully",
+    });
+  } catch (error) {
+    return next(new ErrorHandler(error, 500));
+  }
+});
+
+const getAllUsers = CatchAsyncError(async (req, res, next) => {
+  try {
+    // const users = await User.find().select("name email phone role status vendorProfile");
+
+    // const processedUsers = users.map(user => {
+    //   if (user.role !== "seller") {
+    //     user.vendorProfile = undefined;
+    //   }
+    //   return user;
+    // })
+
+    const users = await User.aggregate([
+      {
+        $project: {
+          name: 1,
+          email: 1,
+          phone: 1,
+          role: 1,
+          status: 1,
+          vendorProfile: {
+            $cond: {
+              if: { $eq: ["$role", "seller"] },
+              then: "$vendorProfile",
+              else: "$$REMOVE",
+            }
+          }
+        }
+      }
+    ])
+
+    res.status(200).json({ success: true, users: users });
+  } catch (error) {
+    return next(new ErrorHandler(error, 500));
+  }
+});
+
 module.exports = {
   createAccount,
   verifyUser,
@@ -300,7 +357,9 @@ module.exports = {
   logout,
   updateAccessToken,
   getUserInfo,
+  updateResetUserPassword,
   updateUserPassword,
   forgetPassword,
   resetPasswordTokenValidate,
+  getAllUsers,
 };

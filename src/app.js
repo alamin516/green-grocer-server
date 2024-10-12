@@ -1,3 +1,4 @@
+require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const morgan = require("morgan");
@@ -18,7 +19,7 @@ const app = express();
 
 const rateLimiter = rateLimit({
     windowMs: 1 * 60 * 1000,
-    max: 100,
+    max: 30,
     message: "Too many requests, please try again later"
 })
 
