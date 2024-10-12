@@ -31,7 +31,8 @@ app.use(cookieParser());
 
 app.use(
   cors({
-    origin: [process.env.ORIGIN],
+    origin: process.env.ORIGIN || "https://green-grocer-mart.web.app",
+    credentials: true,
   })
 );
 
