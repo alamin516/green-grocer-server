@@ -1,7 +1,7 @@
 require("dotenv").config();
 
 const setAccessTokenCookie = (res, accessToken, time = process.env.ACCESS_TOKEN_EXPIRE || 15) => {
-  time = Number(time);
+  time = String(time);
   res.cookie("access_token", accessToken, {
     expires: new Date(Date.now() + time * 60 * 60 * 1000), 
     maxAge: time * 60 * 60 * 1000,
@@ -13,7 +13,7 @@ const setAccessTokenCookie = (res, accessToken, time = process.env.ACCESS_TOKEN_
 };
 
 const setRefreshTokenCookie = (res, refreshToken, time = process.env.REFRESH_TOKEN_EXPIRE || 7) => {
-  time = Number(time);
+  time = String(time);
   res.cookie("refresh_token", refreshToken, {
     expires: new Date(Date.now() + time * 24 * 60 * 60 * 1000),
     maxAge: time * 24 * 60 * 60 * 1000,
