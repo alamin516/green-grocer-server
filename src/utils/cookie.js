@@ -3,7 +3,9 @@ const setAccessTokenCookie = (res, accessToken) => {
     maxAge: 15 * 60 * 1000,
     httpOnly: true,
     secure: true,
-    sameSite: "none",
+    sameSite: "None",
+    domain: "green-grocer-mart.web.app",
+    path: "/",
   });
 };
 
@@ -12,7 +14,9 @@ const setRefreshTokenCookie = (res, refreshToken) => {
     maxAge: 7 * 24 * 60 * 60 * 1000,
     httpOnly: true,
     secure: true,
-    sameSite: "none",
+    sameSite: "None",
+    domain: "green-grocer-mart.web.app",
+    path: "/",
   });
 };
 
