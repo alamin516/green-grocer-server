@@ -29,11 +29,12 @@ app.use(morgan("dev"));
 // Cookie Parser
 app.use(cookieParser());
 
-// cors ==> Cross origin
-app.use(cors({
+app.use(
+  cors({
     origin: [process.env.ORIGIN],
-    credentials: true
-}));
+    credentials: true,
+  })
+);
 
 app.use(rateLimiter);
 app.use(xssClean());
@@ -45,9 +46,6 @@ app.use(express.static("public"));
 
 // Routes /api/v1/
 app.use("/api/v1", seedRouter, userRouter, productRouter);
-
-
-
 
 
 
