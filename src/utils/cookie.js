@@ -1,10 +1,8 @@
-require("dotenv").config();
-
 const setAccessTokenCookie = (res, accessToken) => {
   res.cookie("access_token", accessToken, {
-    maxAge: 15 * 60 * 60 * 1000,
+    maxAge: 15 * 60 * 1000,
     httpOnly: true,
-    secure: true, 
+    secure: true,
     sameSite: "none",
   });
 };
