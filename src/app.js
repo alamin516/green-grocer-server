@@ -30,7 +30,7 @@ app.use(cookieParser());
 
 // cors ==> Cross origin
 app.use(cors({
-  origin: "https://green-grocer-mart.web.app",
+  origin: [process.env.ORIGIN],
   credentials: true,
 }));
 
