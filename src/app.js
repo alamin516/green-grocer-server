@@ -13,6 +13,7 @@ const { errorResponse } = require("./controllers/responseController");
 const { seedRouter } = require("./routes/seedRouter");
 const userRouter = require("./routes/userRouter");
 const productRouter = require("./routes/productRouter");
+const categoryRouter = require("./routes/productCategoryRouter");
 
 
 const app = express();
@@ -25,6 +26,9 @@ const rateLimiter = rateLimit({
 
 // Middlewares
 app.use(morgan("dev"));
+
+app.use(express.json({ limit: "50mb" }));
+app.use(express.urlencoded({ extended: true, limit: "50mb" }));
 
 // Cookie Parser
 app.use(cookieParser());
@@ -45,7 +49,7 @@ app.use(express.static("public"));
 
 
 // Routes /api/v1/
-app.use("/api/v1", seedRouter, userRouter, productRouter);
+app.use("/api/v1", seedRouter, userRouter, productRouter, categoryRouter);
 
 
 

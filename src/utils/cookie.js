@@ -1,9 +1,11 @@
 const setAccessTokenCookie = (res, accessToken) => {
   res.cookie("access_token", accessToken, {
-    maxAge: 15 * 60 * 1000,
+    maxAge: 7 * 24 * 60 * 60 * 1000,
     httpOnly: true,
     secure: true,
-    sameSite: "none",
+    sameSite: "None",
+    domain: "localhost",
+    path: "/",
   });
 };
 
@@ -12,7 +14,9 @@ const setRefreshTokenCookie = (res, refreshToken) => {
     maxAge: 7 * 24 * 60 * 60 * 1000,
     httpOnly: true,
     secure: true,
-    sameSite: "none",
+    sameSite: "None",
+    domain: "localhost",
+    path: "/",
   });
 };
 

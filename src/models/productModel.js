@@ -1,6 +1,5 @@
 const { Schema, model } = require("mongoose");
 
-
 // Comment Reply Schema
 const commentReplySchema = new Schema({
   user: {
@@ -73,22 +72,21 @@ const productSchema = new Schema(
       type: Boolean,
       default: false,
     },
+    product_type:{
+        type: String
+    },
     type: {
       type: String,
-      enum: ["Simple", "External", "Affiliated", "Variable"],
+      enum: ["simple", "external", "affiliated", "variable"],
       required: true,
     },
     status: {
       type: String,
-      enum: ["draft", "private", "publish", "pending"],
+      enum: ["draft", "private", "published", "pending"],
       default: "draft",
     },
     sku: {
       type: String,
-      required: true,
-      default: function () {
-        return `SKU-${Date.now()}`;
-      },
     },
     stock_quantity: {
       type: Number,
@@ -105,10 +103,10 @@ const productSchema = new Schema(
       type: Schema.Types.ObjectId,
       ref: "Category",
     }],
-    brand: {
+    brand: [{
       type: Schema.Types.ObjectId,
       ref: "Brand",
-    },
+    }],
     tags: [{
       type: Schema.Types.ObjectId,
       ref: "Tag",
@@ -141,13 +139,17 @@ const productSchema = new Schema(
       value: { type: String, trim: true },
     }],
     images: [{
-      url: { type: String, required: true },
-      alt_text: { type: String, trim: true },
+      url: { type: String},
+      alt: {type: String}
     }],
     seo: {
       title: String,
       meta_description: String,
       meta_keywords: [String],
+      meta_image: {
+        url: { type: String},
+        alt: {type: String}
+      }
     },
   },
   { timestamps: true }
