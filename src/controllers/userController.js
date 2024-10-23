@@ -147,14 +147,17 @@ const login = CatchAsyncError(async (req, res, next) => {
       return next(new ErrorHandler("Invalid password", 400));
     }
 
-    const accessToken = createJSONWebToken({ user }, jwtAccessSecret, "15m");
+    const accessToken = createJSONWebToken({ user }, jwtAccessSecret, "7d");
     setAccessTokenCookie(res, accessToken);
 
     const refreshToken = createJSONWebToken({ user }, jwtAccessSecret, "7d");
     setRefreshTokenCookie(res, refreshToken);
 
-    const userWithoutPass = user.toObject();
-    delete userWithoutPass.password;
+    const userWithoutPass = await User.findOne(filter).select("-password").lean();
+    
+    if (userWithoutPass.role !== "seller") {
+      delete userWithoutPass.vendorProfile;
+    }
 
     res.status(200).json({
       success: true,
@@ -206,19 +209,57 @@ const updateAccessToken = CatchAsyncError(async (req, res, next) => {
   }
 });
 
+
+const updateRefreshAccessToken= CatchAsyncError(async (req, res, next) => {
+  try {
+    const refresh_token = req.cookies.refresh_token;  
+    const decoded = jwt.verify(refresh_token, jwtAccessSecret);
+
+        
+    if (!decoded) {
+      return res.status(401).json({ message: "Refresh token missing" });
+    }
+    
+    const user = await User.findById(decoded.user);
+    
+    const accessToken = createJSONWebToken({ user }, jwtAccessSecret, "15m");
+    const refreshToken = createJSONWebToken({ user }, jwtAccessSecret, "7d");
+    
+    req.user = user;
+    
+    setAccessTokenCookie(res, accessToken);
+    setRefreshTokenCookie(res, refreshToken);
+
+    res.status(200).json({
+      success: true,
+      message: "Access token and refresh token updated successfully",
+      });
+  } catch (error) {
+    return next(new ErrorHandler(error.message, 500));
+  }
+});
+
+
 const getUserInfo = CatchAsyncError(async (req, res, next) => {
   try {
     const userId = req.user._id;
 
-    const user = await User.findById(userId).select("-password");
+    const user = await User.findById(userId).select("-password")
+
     if (!user) {
       return next(new ErrorHandler("User not found", 404));
     }
 
+      if (user.role !== "seller") {
+        user.vendorProfile = undefined;
+      }else{
+        return user;
+      }
+
     res.status(200).json({
       success: true,
       message: "Getting user data successfully",
-      user,
+      user: user,
     });
   } catch (error) {
     return next(new ErrorHandler(error.message, 400));
@@ -356,6 +397,7 @@ module.exports = {
   login,
   logout,
   updateAccessToken,
+  updateRefreshAccessToken,
   getUserInfo,
   updateResetUserPassword,
   updateUserPassword,

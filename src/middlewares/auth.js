@@ -11,7 +11,7 @@ const isAuthenticated = async (req, res, next) => {
     if (!token) {
       return next(
         new ErrorHandler(
-          "Your access token is expired or missing. Please login to access this resource.",
+          "Unauthorized",
           401
         )
       );
@@ -41,7 +41,7 @@ const authorizeRoles = (...roles) => {
     if (!roles.includes(req.user.role || "")) {
       return next(
         new ErrorHandler(
-          "You do not have permission to perform this action",
+          "Forbidden",
           403
         )
       );

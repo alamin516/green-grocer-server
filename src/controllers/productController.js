@@ -2,19 +2,284 @@ const { products } = require("../data");
 const CatchAsyncError = require("../middlewares/CatchAsyncErrors");
 const { Product } = require("../models/productModel");
 const ErrorHandler = require("../utils/ErrorHandler");
+const slugify = require("../utils/slugify");
 
-const createProduct = CatchAsyncError(async (req, res, next) => {
+const getProducts = CatchAsyncError(async (req, res) => {
   try {
-    await Product.deleteMany();
-    console.log("Existing products deleted");
+    const search = req.query.search || "";
+    const page = Number(req.query.page) || 1;
+    const limit = Number(req.query.limit) || 10;
+    const category = req.query.category || "";
 
-    const seededProducts = await Product.insertMany(products);
-    console.log("Product seeded successfully");
+    const filter = {};
+
+    if (search) {
+      filter.title = { $regex: search, $options: "i" };
+    }
+
+    if (req.query.minPrice !== undefined && req.query.maxPrice !== undefined) {
+      filter.price = { $gte: req.query.minPrice, $lte: req.query.maxPrice };
+    }
+
+    if (req.query.color) {
+      filter.color = req.query.color;
+    }
+
+    if (
+      req.query.ratingMin !== undefined &&
+      req.query.ratingMax !== undefined
+    ) {
+      filter["ratings.average"] = {
+        $gte: req.query.ratingMin,
+        $lte: req.query.ratingMax,
+      };
+    }
+
+    let sortOptions = {};
+
+    if (req.query.sort === "Latest") {
+      sortOptions.createdAt = -1;
+    } else if (req.query.sort === "Old") {
+      sortOptions.createdAt = 1;
+    } else if (req.query.sort === "Ascending") {
+      sortOptions.title = 1;
+    } else if (req.query.sort === "Descending") {
+      sortOptions.title = -1;
+    } else if (req.query.sort === "PriceAsc") {
+      sortOptions.price = 1;
+    } else if (req.query.sort === "PriceDesc") {
+      sortOptions.price = -1;
+    }
+
+    const products = await Product.find(filter)
+      .sort(sortOptions)
+      .limit(limit)
+      .skip((page - 1) * limit);
+
+    const count = await Product.countDocuments(filter);
+
+    const totalPages = Math.ceil(count / limit);
+    const nextPage = page < totalPages ? page + 1 : null;
+    const previousPage = page > 1 ? page - 1 : null;
+
+    const pagination = {
+      totalPages,
+      currentPage: page,
+      nextPage,
+      previousPage,
+    };
+
+    // Featured products
+    const featured_products = await Product.find({ featured: true });
+    const product_type = await Product.find({ product_type: req.query.type});
 
     res.status(200).json({
       success: true,
-      message: "Product seeded successfully",
-      users: seededProducts,
+      message: "Products fetch successfully",
+      payload: {
+        products: {
+          all_products: products,
+          featured_products,
+          product_type
+        },
+        pagination,
+      },
+    });
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+});
+
+const createProduct = CatchAsyncError(async (req, res, next) => {
+  try {
+    const product = req.body;
+
+    const {
+      title,
+      long_description,
+      short_description,
+      price,
+      discount_price,
+      stock_quantity,
+      category,
+      tags,
+      brand,
+      status,
+      stock_status,
+      type,
+      images,
+      specification,
+      seo,
+      sku,
+    } = product;
+
+    if (images?.length === 0) {
+      images.push({
+        url: "upload/images/products/default_product.webp",
+        alt: "Default Product Image",
+      });
+    }
+
+    let slug = slugify(title);
+    let newSlug = slug;
+    let counter = 1;
+
+    while (await Product.exists({ slug: newSlug })) {
+      newSlug = `${slug}-${counter}`;
+      counter++;
+    }
+
+    const newProduct = {
+      title,
+      slug: newSlug,
+      long_description,
+      short_description,
+      price,
+      discount_price,
+      stock_quantity,
+      category,
+      tags,
+      brand,
+      status,
+      stock_status,
+      type,
+      images,
+      specification,
+      seo,
+      sku,
+      user: req?.user?._id,
+    };
+
+    const data = await Product.create(newProduct);
+
+    res.status(200).json({
+      success: true,
+      message: "Product created successfully",
+      data,
+    });
+  } catch (error) {
+    return next(new ErrorHandler(error.message, 400));
+  }
+});
+
+const getProduct = CatchAsyncError(async (req, res, next) => {
+  try {
+    const product = await Product.findOne({ slug: req.params.slug });
+    if (!product) {
+      return next(new ErrorHandler("Product not found", 400));
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Product fetch successfully",
+      product,
+    });
+  } catch (error) {
+    return next(new ErrorHandler(error.message, 400));
+  }
+});
+
+const getProductId = CatchAsyncError(async (req, res, next) => {
+  try {
+    const product = await Product.findOne({ _id: req.params.id });
+    if (!product) {
+      return next(new ErrorHandler("Product not found", 400));
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Product fetch successfully",
+      product,
+    });
+  } catch (error) {
+    return next(new ErrorHandler(error.message, 400));
+  }
+});
+
+const updateProductId = CatchAsyncError(async (req, res, next) => {
+  try {
+    const body = req.body;
+    const product = await Product.findById(req.params.id);
+
+    if (!product) {
+      return next(new ErrorHandler("Product not found", 404));
+    }
+
+    const updatedProduct = await Product.findByIdAndUpdate(
+      req.params.id,
+      { $set: body },
+      { new: true, runValidators: true }
+    );
+
+    res.status(200).json({
+      success: true,
+      message: "Product updated successfully",
+      product: updatedProduct,
+    });
+  } catch (error) {
+    return next(new ErrorHandler(error.message, 400));
+  }
+});
+
+const copyProduct = CatchAsyncError(async (req, res, next) => {
+  try {
+    const productId = req.params.id;
+
+    const product = await Product.findById(productId);
+
+    if (!product) {
+      return next(new ErrorHandler("Product not found", 404));
+    }
+
+    let slug = slugify(product.title);
+    let newSlug = slug;
+    let counter = 1;
+
+    while (await Product.exists({ slug: newSlug })) {
+      newSlug = `${slug}-${counter}`;
+      counter++;
+    }
+
+    const newProductData = {
+      ...product,
+      _id: undefined,
+      title: `${product.title} (Copy)`,
+      slug: `${newSlug}`,
+      price: `${product.price}`,
+      type: "simple",
+      status: "draft",
+      images: product.images.map((image) => ({
+        ...image,
+        _id: undefined,
+      })),
+      seo: product.seo,
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
+    };
+
+    const newProduct = await Product.create(newProductData);
+
+    res.status(201).json({
+      success: true,
+      message: "Product copied successfully",
+      product: newProduct,
+    });
+  } catch (error) {
+    return next(new ErrorHandler(error.message, 400));
+  }
+});
+
+const deleteProduct = CatchAsyncError(async (req, res, next) => {
+  try {
+    const product = await Product.findByIdAndDelete(req.params.id);
+    if (!product) {
+      return next(new ErrorHandler("Product not found", 400));
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Product deleted successfully",
+      data: product,
     });
   } catch (error) {
     return next(new ErrorHandler(error.message, 400));
@@ -26,17 +291,26 @@ const queryProduct = CatchAsyncError(async (req, res, next) => {
     const { search } = req.query;
 
     const products = await Product.find({
-        $or: [{ title:  search }]
+      $or: [{ title: search }],
     });
 
     res.status(200).json({
       success: true,
       message: "Product seeded successfully",
-      products
+      products,
     });
   } catch (error) {
     return next(new ErrorHandler(error.message, 400));
   }
 });
 
-module.exports = { createProduct, queryProduct };
+module.exports = {
+  getProducts,
+  createProduct,
+  deleteProduct,
+  queryProduct,
+  getProduct,
+  getProductId,
+  updateProductId,
+  copyProduct,
+};
