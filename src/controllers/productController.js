@@ -70,8 +70,11 @@ const getProducts = CatchAsyncError(async (req, res) => {
     };
 
     // Featured products
-    const featured_products = await Product.find({ featured: true });
+    const featured_products = await Product.find({ featured: true })
+    .sort({ createdAt: -1 })
     const product_type = await Product.find({ product_type: req.query.type});
+    const latest_products = await Product.find({})
+    .sort({ createdAt: -1 })
 
     res.status(200).json({
       success: true,
@@ -80,6 +83,7 @@ const getProducts = CatchAsyncError(async (req, res) => {
         products: {
           all_products: products,
           featured_products,
+          latest_products,
           product_type
         },
         pagination,
