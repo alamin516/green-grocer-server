@@ -193,10 +193,10 @@ const userSchema = new Schema(
 
     // For customers: Carts, Wishlist, and Orders
     // For Cart Items
-    cart: [cartItemSchema],
+    // cart: [cartItemSchema],
 
     // For Wishlist
-    wishlist: [wishlistItemSchema],
+    // wishlist: [wishlistItemSchema],
 
     // For Delivery Addresses
     deliveryAddresses: [deliveryAddressSchema],

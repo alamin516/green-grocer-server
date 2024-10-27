@@ -9,7 +9,7 @@ const {
   updateProductId,
   copyProduct,
 } = require("../controllers/productController");
-const { isAuthenticated } = require("../middlewares/auth");
+const { isAuthenticated, authorizeRoles } = require("../middlewares/auth");
 const { updateAccessToken } = require("../controllers/userController");
 const productRouter = express.Router();
 
@@ -19,6 +19,7 @@ productRouter.post(
   "/create-product",
   updateAccessToken,
   isAuthenticated,
+  authorizeRoles("admin", "manager"),
   createProduct
 );
 
@@ -26,6 +27,7 @@ productRouter.put(
   "/update-product/:id",
   updateAccessToken,
   isAuthenticated,
+  authorizeRoles("admin", "manager"),
   updateProductId
 );
 
@@ -33,6 +35,7 @@ productRouter.delete(
   "/delete-product/:id",
   updateAccessToken,
   isAuthenticated,
+  authorizeRoles("admin", "manager"),
   deleteProduct
 );
 
@@ -49,6 +52,7 @@ productRouter.post(
   "/copy-product/:id",
   updateAccessToken,
   isAuthenticated,
+  authorizeRoles("admin", "manager"),
   copyProduct
 );
 

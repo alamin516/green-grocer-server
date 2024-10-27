@@ -1,39 +1,57 @@
 const { Schema, model } = require("mongoose");
 
-// Comment Reply Schema
-const commentReplySchema = new Schema({
-  user: {
-    type: Schema.Types.ObjectId,
-    ref: "User",
-    required: true,
+const commentReplySchema = new Schema(
+  {
+    userId: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
+    username: {
+      type: String,
+      required: true,
+    },
+    comment: {
+      type: String,
+      required: true,
+      trim: true,
+    },
   },
-  comment: {
-    type: String,
-    required: true,
-    trim: true,
-  }
-},{ timestamps: true });
+  { timestamps: true }
+);
 
 // Review Schema
-const reviewSchema = new Schema({
-  user: {
-    type: Schema.Types.ObjectId,
-    ref: "User",
-    required: true,
+const reviewSchema = new Schema(
+  {
+    userId: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
+    username: {
+      type: String,
+      required: true,
+    },
+    rating: {
+      type: Number,
+      min: 1,
+      max: 5,
+      required: true,
+    },
+    comment: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    commentReplies: [commentReplySchema],
+    likes: [
+      {
+          userId: { type: Schema.Types.ObjectId, ref: 'User', required: true }
+      }
+  ],
   },
-  rating: {
-    type: Number,
-    min: 1,
-    max: 5,
-    required: true,
-  },
-  comment: {
-    type: String,
-    required: true,
-    trim: true,
-  },
-  commentReplies: [commentReplySchema], 
-},{ timestamps: true });
+  { timestamps: true }
+);
 
 // Product Schema
 const productSchema = new Schema(
@@ -72,8 +90,8 @@ const productSchema = new Schema(
       type: Boolean,
       default: false,
     },
-    product_type:{
-        type: String
+    product_type: {
+      type: String,
     },
     type: {
       type: String,
@@ -95,25 +113,31 @@ const productSchema = new Schema(
       default: 0,
     },
     sold: {
-        type: Number,
-        min: 0,
-        default: 0,
+      type: Number,
+      min: 0,
+      default: 0,
     },
-    category: [{
-      type: Schema.Types.ObjectId,
-      ref: "Category",
-    }],
-    brand: [{
-      type: Schema.Types.ObjectId,
-      ref: "Brand",
-    }],
-    tags: [{
-      type: Schema.Types.ObjectId,
-      ref: "Tag",
-    }],
+    category: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "Category",
+      },
+    ],
+    brand: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "Brand",
+      },
+    ],
+    tags: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "Tag",
+      },
+    ],
     vendor: {
       type: Schema.Types.ObjectId,
-      ref: "Vendor", 
+      ref: "Vendor",
       required: false,
     },
     reviews: [reviewSchema],
@@ -134,29 +158,37 @@ const productSchema = new Schema(
       ref: "User",
       required: false,
     },
-    specification: [{
-      key: { type: String, trim: true },
-      value: { type: String, trim: true },
-    }],
-    images: [{
-      url: { type: String},
-      alt: {type: String}
-    }],
+    specification: [
+      {
+        key: { type: String, trim: true },
+        value: { type: String, trim: true },
+      },
+    ],
+    images: [
+      {
+        url: { type: String },
+        alt: { type: String },
+      },
+    ],
     seo: {
       title: String,
       meta_description: String,
       meta_keywords: [String],
       meta_image: {
-        url: { type: String},
-        alt: {type: String}
-      }
+        url: { type: String },
+        alt: { type: String },
+      },
     },
   },
   { timestamps: true }
 );
 
 // Indexing to improve search performance
-productSchema.index({ title: "text", short_description: "text", long_description: "text" });
+productSchema.index({
+  title: "text",
+  short_description: "text",
+  long_description: "text",
+});
 
 const Product = model("Product", productSchema);
 
