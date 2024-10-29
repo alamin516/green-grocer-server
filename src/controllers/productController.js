@@ -209,9 +209,23 @@ const updateProductId = CatchAsyncError(async (req, res, next) => {
       return next(new ErrorHandler("Product not found", 404));
     }
 
+    let slug = slugify(product.slug ? product.slug : product.title);
+    let newSlug = slug;
+    let counter = 1;
+
+    while (await Product.exists({ slug: newSlug })) {
+      newSlug = `${slug}-${counter}`;
+      counter++;
+    }
+
+    const newProductData = {
+      ...body,
+      slug: slug,
+    }
+
     const updatedProduct = await Product.findByIdAndUpdate(
       req.params.id,
-      { $set: body },
+      { $set: newProductData },
       { new: true, runValidators: true }
     );
 
