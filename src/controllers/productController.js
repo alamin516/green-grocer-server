@@ -37,7 +37,7 @@ const getProducts = CatchAsyncError(async (req, res) => {
 
     let sortOptions = {};
 
-    if (req.query.sort === "Latest") {
+    if (req.query.sort.toString() === "Latest") {
       sortOptions.createdAt = -1;
     } else if (req.query.sort === "Old") {
       sortOptions.createdAt = 1;
