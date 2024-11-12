@@ -4,38 +4,57 @@ const { deliveryAddressSchema, paymentMethodSchema } = require("./userModel");
 
 // Order Schema
 const orderSchema = new Schema({
-  user: {
+  orderId: {
+    type: String,
+  },
+  userId: {
     type: Schema.Types.ObjectId,
     ref: "User",
     required: true,
   },
-  products: [
+  items: [
     {
-      product: {
+      productId: {
         type: Schema.Types.ObjectId,
         ref: "Product",
         required: true,
+      },
+      title: {
+        type: String,
+      },
+      image: {
+        type: String,
       },
       quantity: {
         type: Number,
         required: true,
       },
-      price: {
+      unitPrice: {
         type: Number,
-        required: true,
       },
-      discount: {
+      totalPrice:{
+        type:Number,
+      },
+      discountPercentage: {
         type: Number,
         default: 0,
       },
     },
   ],
-  totalPrice: {
-    type: Number,
-    required: true,
+  totals: {},
+  billingAddress: {},
+  shippingAddress: {},
+  paymentMethod: {
+    type: String
   },
-  shippingAddress: deliveryAddressSchema,
-  paymentMethod: paymentMethodSchema,
+  paymentInfo: {},
+  notes: {
+    type: String
+  },
+  isGiftOrder: {
+    type: Boolean,
+    default: false,
+  },
   orderStatus: {
     type: String,
     enum: ["pending", "processing", "shipped", "delivered", "cancelled"],

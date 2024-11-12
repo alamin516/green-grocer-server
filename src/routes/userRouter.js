@@ -10,7 +10,7 @@ userRouter.post("/verify-user", verifyUser);
 
 userRouter.post("/login", login);
 
-userRouter.get("/logout", isAuthenticated, logout);
+userRouter.post("/logout", isAuthenticated, logout);
 
 userRouter.post("/refresh-token", updateRefreshAccessToken);
 
