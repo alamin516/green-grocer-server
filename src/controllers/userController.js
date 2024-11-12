@@ -171,8 +171,8 @@ const login = CatchAsyncError(async (req, res, next) => {
 
 const logout = CatchAsyncError(async (req, res, next) => {
   try {
-    res.cookie("access_token", "", { maxAge: 1 });
-    res.cookie("refresh_token", "", { maxAge: 1 });
+    res.cookie("access_token", "", { maxAge: 0 });
+    res.cookie("refresh_token", "", { maxAge: 0 });
 
     res.status(200).json({
       success: true,

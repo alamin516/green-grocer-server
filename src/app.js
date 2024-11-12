@@ -16,6 +16,7 @@ const productRouter = require("./routes/productRouter");
 const categoryRouter = require("./routes/productCategoryRouter");
 const cartRouter = require("./routes/cartRouter");
 const reviewRouter = require("./routes/reviewsRouter");
+const orderRouter = require("./routes/orderRouter");
 
 
 const app = express();
@@ -53,7 +54,7 @@ app.use(express.static("public"));
 
 
 // Routes /api/v1/
-app.use("/api/v1", seedRouter, userRouter, cartRouter, productRouter, categoryRouter, reviewRouter);
+app.use("/api/v1", seedRouter, userRouter, cartRouter, productRouter, categoryRouter, reviewRouter, orderRouter);
 
 
 
