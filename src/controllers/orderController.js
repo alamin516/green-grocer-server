@@ -1,11 +1,11 @@
+require("dotenv").config();
 const CatchAsyncError = require("../middlewares/CatchAsyncErrors");
 const Order = require("../models/orderModel");
 const { Product } = require("../models/productModel");
 const ErrorHandler = require("../utils/ErrorHandler");
 
-require("dotenv").config();
 
-const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
+const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY || "sk_test_51OfU0yKWZs98dwtgJLxyYmEczBSMctt9E0ZY3NHfMyXRG44qMdaQrkZqazwKoqI7iMGBtz9dw3KGFpkvN8mCR6JY00x5ngzPs6");
 
 const createOrder = CatchAsyncError(async (req, res, next) => {
   try {
@@ -134,6 +134,29 @@ const getOrdersByAdmin =  CatchAsyncError(async (req, res, next) => {
     return next(new ErrorHandler(error.message, 400));
   }
 });
+
+
+// update order status
+const updateOrderStatus =  CatchAsyncError(async (req, res, next) => {
+  try {
+    const orderId = req.params.id;
+    const order = await Order.findById(orderId);
+    if (!order) {
+      return next(new ErrorHandler('Order not found', 404));
+    }
+
+    const updatedOrder = await Order.findByIdAndUpdate(orderId, req.body, {
+      new: true,
+    })
+
+    res.status(200).json({
+      status: 'success',
+      message: "Order status updated successfully",
+    })
+  }catch(error){
+    return next(new ErrorHandler(error.message, 400));
+  }
+})
 
 
 // send stripe publishable key
